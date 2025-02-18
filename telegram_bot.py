@@ -10,7 +10,7 @@ from main.models import ChatMessage
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, MessageHandler, filters, CommandHandler, CallbackContext
 
-BOT_TOKEN = "6618658436:AAH8KMqvEcwrXJyGbmPMUWPqC_x3D4r-Eb8"
+BOT_TOKEN = ""
 
 client = OpenAI(
     api_key='',
