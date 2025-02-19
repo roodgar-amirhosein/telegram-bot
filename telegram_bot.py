@@ -2,6 +2,9 @@ import os
 import django
 from asgiref.sync import sync_to_async
 from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "test_project.settings")
 django.setup()
@@ -10,10 +13,11 @@ from main.models import ChatMessage
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, MessageHandler, filters, CommandHandler, CallbackContext
 
-BOT_TOKEN = ""
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 client = OpenAI(
-    api_key='',
+    api_key=OPENAI_API_KEY,
 )
 
 
