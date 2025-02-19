@@ -1,3 +1,4 @@
+import asyncio
 import os
 import django
 from asgiref.sync import sync_to_async
@@ -13,6 +14,7 @@ from main.models import ChatMessage
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, MessageHandler, filters, CommandHandler, CallbackContext
 
+
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
@@ -24,7 +26,6 @@ client = OpenAI(
 # Use sync_to_async for database operations to make them compatible with async functions
 @sync_to_async
 def get_message_history(user_id):
-    # Fetch only the necessary data from the database in a single query
     last_messages = ChatMessage.objects.filter(user_id=user_id, active_memory=True).values("message", "response")
     conversation_history = [
         {"role": "user", "content": msg["message"]} for msg in last_messages
@@ -37,39 +38,37 @@ def get_message_history(user_id):
 # Use sync_to_async to remove message history
 @sync_to_async
 def remove_message_history(user_id):
-    # Use bulk update to remove history more efficiently
     ChatMessage.objects.filter(user_id=user_id, active_memory=True).update(active_memory=False)
 
 
 async def start(update: Update, context: CallbackContext):
-    # Create a custom keyboard with a "Remove History" button
     keyboard = [
         [KeyboardButton("Remove History")],
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
-    await update.message.reply_text("Hello! Send me a message.", reply_markup=reply_markup)
+    await update.message.reply_text("در چه زمینه ای میتونم کمکتون کنم", reply_markup=reply_markup)
 
 
 async def get_openai_response(user_message: str, user_id):
-    try:
-        conversation_history = await get_message_history(user_id)
+    max_retries = 3
+    start_prompt = {"role": "system", "content": "تو یه دستیار هستی و باید به کاربرا کمک کنی و سوالاشون رو جواب بدی"}
+    for attempt in range(max_retries):
+        try:
+            conversation_history = await get_message_history(user_id)
+            conversation_history.append(start_prompt)  # Add the start prompt
+            conversation_history.append({"role": "user", "content": user_message})
 
-        # Append the new user message to the history
-        conversation_history.append({"role": "user", "content": user_message})
+            chat_completion = client.chat.completions.create(
+                messages=conversation_history,
+                model="gpt-4o-mini",
+            )
+            return chat_completion.choices[0].message.content
 
-        # Make a request to OpenAI's 4o-mini model
-        chat_completion = client.chat.completions.create(
-            messages=conversation_history,
-            model="gpt-4o-mini",
-        )
-        assistant_reply = chat_completion.choices[0].message.content
-
-        # Append the assistant's reply to the conversation history
-        conversation_history.append({"role": "assistant", "content": assistant_reply})
-
-        return assistant_reply
-    except Exception as e:
-        return f"Error: {str(e)}"
+        except Exception as e:
+            if attempt < max_retries - 1:
+                await asyncio.sleep(1)  # Wait before retrying
+            else:
+                return f"Error: {str(e)}"
 
 
 async def handle_message(update: Update, context: CallbackContext):
@@ -79,20 +78,15 @@ async def handle_message(update: Update, context: CallbackContext):
 
         # Check if the message is "Remove History"
         if text.lower() == "remove history":
-            # Remove message history from the database
             await remove_message_history(user_id)
 
-            # Notify the user that history has been removed
-            await update.message.reply_text("Your message history has been removed.")
+            await update.message.reply_text("حافظه ی چت پاک شد!")
             return  # Stop further processing for this message
 
-        # Get OpenAI response for the user's message
         openai_response = await get_openai_response(text, user_id)
 
-        # Save the user message and OpenAI response to the database
         await sync_to_async(ChatMessage.objects.create)(user_id=user_id, message=text, response=openai_response)
 
-        # Send the OpenAI response to the user
         await update.message.reply_text(openai_response)
     except Exception as e:
         print(e)

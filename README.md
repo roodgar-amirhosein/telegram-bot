@@ -50,7 +50,8 @@ Before starting, make sure you have the following installed on your system:
    After the database is up and running, execute the `telegram-bot.py` file to start the bot:
 
    ```bash
-   python telegram-bot.py
+   python manage.py migrate
+   python telegram_bot.py
    ```
 
    Your Telegram bot should now be running.
