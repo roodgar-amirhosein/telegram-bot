@@ -11,16 +11,23 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv()
+
+# load data from .env
+SECRET_KEY = os.getenv('SECRET_KEY')
+DATABASE_USER = os.getenv('DATABASE_USER')
+DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-b_i3d3h34-pbw+2)a*c$cx2$n+!wb0=%36d&a0te*7-jfz@10u'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -85,8 +92,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'chatbot_db',
-        'USER': 'user',
-        'PASSWORD': 'pass123',
+        'USER': DATABASE_USER,
+        'PASSWORD': DATABASE_PASSWORD,
         'HOST': 'localhost',  # Or your PostgreSQL server address
         'PORT': '5432',  # Default PostgreSQL port
     }

@@ -51,7 +51,7 @@ async def start(update: Update, context: CallbackContext):
 
 async def get_openai_response(user_message: str, user_id):
     max_retries = 3
-    start_prompt = {"role": "system", "content": "تو یه دستیار هستی و باید به کاربرا کمک کنی و سوالاشون رو جواب بدی"}
+    start_prompt = {"role": "system", "content": "تو یه دستیاری به سوالات جواب بده"}
     for attempt in range(max_retries):
         try:
             conversation_history = await get_message_history(user_id)
@@ -76,7 +76,6 @@ async def handle_message(update: Update, context: CallbackContext):
         user_id = update.message.chat_id
         text = update.message.text
 
-        # Check if the message is "Remove History"
         if text.lower() == "remove history":
             await remove_message_history(user_id)
 

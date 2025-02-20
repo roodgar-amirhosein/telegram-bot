@@ -27,15 +27,23 @@ Before starting, make sure you have the following installed on your system:
    ```bash
    pip install -r requirements.txt
    ```
+   
 
-3. **Docker Setup**
+3. **Environment Variables Setup**
+
+
+- There is a .sample-env file that contains the format for the .env file.
+- You should create a .env file and set values for the required variables before proceeding.
+
+
+4. **Docker Setup**
 
    Ensure that Docker and Docker Compose are installed on your system.
 
    - If you haven't installed Docker, you can follow the official installation guide: [Docker Installation](https://docs.docker.com/get-docker/)
    - For Docker Compose, follow the guide here: [Docker Compose Installation](https://docs.docker.com/compose/install/)
 
-4. **Start the Services**
+5. **Start the Services**
 
    Run the following command to start the database service in the background using Docker Compose:
 
@@ -45,7 +53,7 @@ Before starting, make sure you have the following installed on your system:
 
    This will pull the required Docker images and start the PostgreSQL database container.
 
-5. **Running the Bot**
+6. **Running the Bot**
 
    After the database is up and running, execute the `telegram-bot.py` file to start the bot:
 
