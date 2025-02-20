@@ -67,7 +67,7 @@ Before starting, make sure you have the following installed on your system:
 ## Important Note
 
 - The server must have access to a VPN in order to connect to Telegram's API.
-- Make sure the `.env` file is correctly configured with your `BOT_TOKEN` and OpenAI API key.
+- Make sure the `.env` file is correctly configured .
 
 ---
 
